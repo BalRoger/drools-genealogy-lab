@@ -17,7 +17,7 @@ public class GenealogyTest {
 
 			// 4 - create and assert some facts
             Person phil = new Person("Phil");
-            Person claire = new Person("Anne");
+            Person claire = new Person("Claire");
             Person jessica = new Person("Jessica");
             Person michael = new Person("Michael", claire, phil);
             Person steve = new Person("Steve", jessica, phil);
