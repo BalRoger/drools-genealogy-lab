@@ -7,16 +7,14 @@ rule "HalfSiblings"
 	when
 		person1: Person(
 		    p1mother: mother != null, 
-		    p1father: father != null
+		    p1father: father != null,
+		    p1name: name
 		)
 		person2: Person(
 		    mother != null, 
-		    father != null, 
-		    (
-		     ((parents contains p1mother) && (parents not contains p1father)) || 
-		     ((parents not contains p1mother) && (parents contains p1father))
-		    ),
-		    this != person1
+		    father != null,
+		    eval((mother == p1mother) != (father == p1father)),
+            name > p1name
 		) 
 		not SiblingRelationship(members contains person1, members contains person2)
 	then 	
@@ -27,18 +25,39 @@ rule "Siblings"
 	when
 		person1: Person(
 		    p1mother: mother != null, 
-		    p1father: father != null
+		    p1father: father != null,
+		    p1name: name
 		)
 		person2: Person(
 		    mother != null, 
 		    father != null, 
 		    mother == p1mother, 
 		    father == p1father, 
-		    this != person1
+		    name > p1name
 		) 
 		not SiblingRelationship(members contains person1, members contains person2)
 	then 	
 		insert(new SiblingRelationship(person1, person2, SiblingType.SIBLING));
+end
+
+rule "Parent Ancestors"
+    when
+        parent: Person( )
+        child: Person( mother != null, father != null, parents contains parent, this != parent )
+        not AncestorRelationship ( ancestor == parent, descendant == child )
+    then
+        AncestorRelationship rel = new AncestorRelationship( parent, child );
+        insert( rel );
+end
+
+rule "Transitive Ancestors"
+    when
+        AncestorRelationship ( mid: ancestor, d: descendant )
+        AncestorRelationship ( a: ancestor, descendant == mid )
+        not AncestorRelationship( ancestor == a, descendant == d )
+    then
+        AncestorRelationship rel = new AncestorRelationship( a, d );
+        insert( rel );
 end
 
 rule "PrintRelationships"
@@ -48,6 +67,26 @@ rule "PrintRelationships"
         relationship.printIt();
 end
 
-query "getAllRelationships"
+query "getSiblings"
     relationship: SiblingRelationship()
+end
+
+query "getFullSiblings"
+    relationship: SiblingRelationship( type == SiblingType.HALF_SIBLING )
+end
+
+query "getHalfSiblings"
+    relationship: SiblingRelationship( type == SiblingType.SIBLING )
+end
+
+query "getAncestors"
+    rel: AncestorRelationship()
+end
+
+query "getAncestorsOf"( Person p )
+    rel: AncestorRelationship( descendant == p )
+end
+
+query "getDescendantsOf"( Person p )
+    rel: AncestorRelationship( ancestor == p )
 end
