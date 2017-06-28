@@ -5,38 +5,16 @@ import java.util.List;
 
 rule "HalfSiblings"
 	when
-		person1: Person(
-		    p1mother: mother != null, 
-		    p1father: father != null
-		)
-		person2: Person(
-		    mother != null, 
-		    father != null, 
-		    (
-		     ((parents contains p1mother) && (parents not contains p1father)) || 
-		     ((parents not contains p1mother) && (parents contains p1father))
-		    ),
-		    this != person1
-		) 
-		not SiblingRelationship(members contains person1, members contains person2)
+        person1: Person()
+        person2: Person()
 	then 	
 		insert(new SiblingRelationship(person1, person2, SiblingType.HALF_SIBLING));
 end
 
 rule "Siblings"
 	when
-		person1: Person(
-		    p1mother: mother != null, 
-		    p1father: father != null
-		)
-		person2: Person(
-		    mother != null, 
-		    father != null, 
-		    mother == p1mother, 
-		    father == p1father, 
-		    this != person1
-		) 
-		not SiblingRelationship(members contains person1, members contains person2)
+		person1: Person()
+        person2: Person()
 	then 	
 		insert(new SiblingRelationship(person1, person2, SiblingType.SIBLING));
 end
